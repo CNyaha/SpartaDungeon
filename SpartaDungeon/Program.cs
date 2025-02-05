@@ -32,8 +32,11 @@ namespace SpartaDungeon
         public bool isArmorEquip { get; set; }
         // 플레이어의 골드
         public int Gold { get; set; }
-        
+        // 플레이어의 경험치
+        public int Exp { get; set; }
 
+
+        public void LevelExp(int exp);
 
         // 무기를 장착시키는 메서드
         public void WeaponEquipment(IChracter player, IWeapon equipitem, IWeapon changeItem);
@@ -204,7 +207,7 @@ namespace SpartaDungeon
     {
         public string Name { get; }
         public int Health { get; set; }
-        public int Level { get; set; }
+        public int Level { get; set; } = 1;
         public int Attack { get; set; }
         public int WeaponAttack { get; set; } = 0;
         public int Defence { get; set; }
@@ -219,6 +222,21 @@ namespace SpartaDungeon
 
         public bool IsDead => Health <= 0;
         public int Gold { get; set; }
+
+        public int Exp { get; set; } = 0;
+
+
+        public void LevelExp(int exp)
+        {
+            Exp += exp;
+            if (Exp == Level)
+            {
+                Level++;
+                Exp = 0;
+                Console.WriteLine("레벨업을 하셨습니다!.");
+                Console.WriteLine($"현재 레벨 : {Level}");
+            }
+        }
 
         public Warrior(string name)
         {
@@ -241,11 +259,11 @@ namespace SpartaDungeon
             }
             else
             {
-                Console.WriteLine($"{damage - Defence}의 피해를 받았습니다. {Name}님의 남은 체력 : {Health}");
+                Console.WriteLine($"{Health}");
             }
         }
 
-        // 장착되어있는 아이템을 해제 후 다른 아이템을 장착시킨다.
+        // 장착되어있는 무기를 해제 후 다른 무기를 장착시킨다.
         public void WeaponEquipment(IChracter player, IWeapon equipItem, IWeapon changeItem)
         {
             if (equipItem.isEquip == false)
@@ -263,7 +281,7 @@ namespace SpartaDungeon
                 player.WeaponAttack += changeItem.Attack;
             }
         }
-        // 아이템을 장착시킨다.
+        // 무기를 장착시킨다.
         public void WeaponEquipment(IChracter player, IWeapon equipItem)
         {
 
@@ -273,6 +291,7 @@ namespace SpartaDungeon
             player.isWeaponEquip = true;
         }
 
+        // 무기를 장착 해제시킨다.
         public void WeaponUnEquipment(IChracter player, IWeapon equipItem)
         {
             if (equipItem.isEquip == false)
@@ -288,7 +307,7 @@ namespace SpartaDungeon
             }
         }
 
-        // 장착시키고 장착되어있는게 있다면 장착 해제 후 장착시킨다.
+        // 장착되어있는 방어구가 있다면 장착 해제 후 장착시킨다.
         public void ArmorEquipment(IChracter player, IArmor equipItem, IArmor changeItem)
         {
             if (equipItem.isEquip == false)
@@ -307,7 +326,7 @@ namespace SpartaDungeon
                 player.ArmorDefence += changeItem.Defence;
             }
         }
-        // 아이템을 장착시킨다.
+        // 방어구를 장착시킨다.
         public void ArmorEquipment(IChracter player, IArmor equipItem)
         {
 
@@ -317,7 +336,7 @@ namespace SpartaDungeon
             player.isArmorEquip = true;
         }
 
-        // 장착 해제하는 메서드
+        // 방어구를 장착 해제하는 메서드
         public void ArmorUnEquipment(IChracter player, IArmor equipItem)
         {
             if (equipItem.isEquip == false)
@@ -372,18 +391,28 @@ namespace SpartaDungeon
                 Console.WriteLine();
                 Console.WriteLine("원하시는 행동을 입력해주세요.");
                 Console.Write(">> ");
-                string number = Console.ReadLine();
-                int nNumber = int.Parse(number);
-                switch (nNumber)
+
+                int nNumber;
+                string s = Console.ReadLine();
+                bool numberCheck = int.TryParse(s, out nNumber);
+
+                if (!numberCheck)
                 {
-                    case 0:
-                        isState = false;
-                        break;
+                    Console.WriteLine("잘못된 입력입니다.");
+                }
+                else
+                {
+                    switch (nNumber)
+                    {
+                        case 0:
+                            isState = false;
+                            break;
 
-                    default:
-                        Console.WriteLine("잘못된 입력입니다.");
-                        break;
+                        default:
+                            Console.WriteLine("잘못된 입력입니다.");
+                            break;
 
+                    }
                 }
 
 
@@ -438,29 +467,43 @@ namespace SpartaDungeon
                 Console.WriteLine();
                 Console.WriteLine("원하시는 행동을 입력해주세요.");
                 Console.Write(">> ");
-                number = Console.ReadLine();
 
-                switch (int.Parse(number))
+                int number = -1;
+                string s = Console.ReadLine();
+                bool isNumberCheck = int.TryParse(s, out number);
+
+                if (!isNumberCheck)
                 {
-                    case 1:
-                        player.PlayerStats(player);
-                        break;
+                    Console.WriteLine("잘못된 입력입니다.");
+                }
+                else
+                {
+                    switch (number)
+                    {
+                        case 1:
+                            player.PlayerStats(player);
+                            break;
 
-                    case 2:
-                        Inventory(player, weapons, armors);
-                        break;
+                        case 2:
+                            Inventory(player, weapons, armors);
+                            break;
 
-                    case 3:
-                        Store(player, weapons, armors);
-                        break;
+                        case 3:
+                            Store(player, weapons, armors);
+                            break;
 
-                    case 4:
-                        Console.WriteLine("아직 구현이 되지않았습니다.");
-                        break;
+                        case 4:
+                            DungeonSelect(player);
+                            break;
 
-                    case 5:
-                        Rest(player);
-                        break;
+                        case 5:
+                            Rest(player);
+                            break;
+
+                        default:
+                            Console.WriteLine("잘못된 입력입니다.");
+                            break;
+                    }
                 }
 
 
@@ -530,120 +573,139 @@ namespace SpartaDungeon
                     Console.WriteLine("원하시는 행동을 입력해주세요.");
                     Console.Write(">> ");
 
-                    int number = int.Parse(Console.ReadLine());
+                    int number;
+                    string s = Console.ReadLine();
+                    bool numberCheck = int.TryParse(s, out number);
 
-                    switch (number)
+                    if (!numberCheck)
                     {
-                        case 1:
-                            isEquipManage = true;
-                            break;
+                        Console.WriteLine("잘못된 입력입니다.");
+                    }
+                    else
+                    {
+                        switch (number)
+                        {
+                            case 1:
+                                isEquipManage = true;
+                                break;
 
-                        case 0:
-                            isInventory = false;
-                            break;
+                            case 0:
+                                isInventory = false;
+                                break;
 
-                        default:
-                            Console.WriteLine("잘못된 입력입니다.");
-                            break;
+                            default:
+                                Console.WriteLine("잘못된 입력입니다.");
+                                break;
 
+                        }
                     }
                 }
                 else if (isEquipManage)
                 {
                     Console.WriteLine("\n0. 나가기\n");
                     Console.WriteLine("원하시는 행동을 입력해주세요.");
-                    Console.Write(">>");
+                    Console.Write(">> ");
 
-                    int number = int.Parse(Console.ReadLine());
+                    int number;
+                    string s = Console.ReadLine();
+                    bool numberCheck = int.TryParse(s, out number);
 
-                    if (number == 0)
+                    if (!numberCheck)
                     {
-                        // 장착관리 나가기
-                        isEquipManage = false;
-                    }
-                    else if (count > number)
-                    {
-                        // 설정이 완료됐는지 확인하는 변수
-                        bool isSuccess = false;
-
-                        // weapon의 아이템 번호와 선택한 번호가 같다면
-                        foreach (IWeapon weapon in weapons.Where(wp => wp.ItemNumber == number))
-                        {
-                            // 플레이어가 무기를 장착하고 있다면
-                            if (player.isWeaponEquip)
-                            {
-                                // equipWeapon중에 장착중인 아이템이 있다면
-                                foreach (IWeapon equipWeapon in weapons.Where(wp1 => wp1.isEquip))
-                                {
-                                    // equipWeapon과 weapon이 같다면
-                                    if (equipWeapon == weapon)
-                                    {
-                                        // 아이템 장착해제
-                                        player.WeaponUnEquipment(player, weapon);
-                                        isSuccess = true;
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        // 아니라면 equipWeapon을 해제하고 weapon을 장착
-                                        player.WeaponEquipment(player, equipWeapon, weapon);
-                                        isSuccess = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            // 무기를 장착중이 아니라면
-                            else if (player.isWeaponEquip == false)
-                            {
-                                //  weapon 무기 장착
-                                player.WeaponEquipment(player, weapon);
-                                isSuccess = true;
-                                break;
-                            }
-
-                        }
-                        
-
-                        if (!isSuccess)
-                        {
-                            //   armors에 ItemNumber가 number 랑 같다면
-                            foreach (IArmor armor in armors.Where(ar => ar.ItemNumber == number))
-                            {
-                                // 플레이어가 방어구를 장착했는지 확인
-                                if (player.isArmorEquip)
-                                {
-                                    // 장착중인 방어구를 확인(isEquip이 true라면)
-                                    foreach (IArmor equipArmor in armors.Where(ea => ea.isEquip))
-                                    {
-                                        // 장착중인 아이템 번호와 장찰할 아이템 번호가 같다면 방어구 해제
-                                        if (armor == equipArmor)
-                                        {
-                                            player.ArmorUnEquipment(player, armor);
-                                            break;
-                                        }
-                                        // 아니라면 방어구를 바꾼다.
-                                        else
-                                        {
-                                            player.ArmorEquipment(player, equipArmor, armor);
-                                            break;
-                                        }
-
-                                    }
-                                }
-                                // 장착을 안했다면 장착시켜주기
-                                else if (player.isArmorEquip == false)
-                                {
-                                    player.ArmorEquipment(player, armor);
-                                    break;
-                                }
-                            }
-                        }
-
-
+                        Console.WriteLine("잘못된 입력입니다.");
                     }
                     else
                     {
-                        Console.WriteLine("잘못된 입력입니다.");
+
+                        if (number == 0)
+                        {
+                            // 장착관리 나가기
+                            isEquipManage = false;
+                        }
+                        else if (count > number)
+                        {
+                            // 설정이 완료됐는지 확인하는 변수
+                            bool isSuccess = false;
+
+                            // weapon의 아이템 번호와 선택한 번호가 같다면
+                            foreach (IWeapon weapon in weapons.Where(wp => wp.ItemNumber == number))
+                            {
+                                // 플레이어가 무기를 장착하고 있다면
+                                if (player.isWeaponEquip)
+                                {
+                                    // equipWeapon중에 장착중인 아이템이 있다면
+                                    foreach (IWeapon equipWeapon in weapons.Where(wp1 => wp1.isEquip))
+                                    {
+                                        // equipWeapon과 weapon이 같다면
+                                        if (equipWeapon == weapon)
+                                        {
+                                            // 아이템 장착해제
+                                            player.WeaponUnEquipment(player, weapon);
+                                            isSuccess = true;
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            // 아니라면 equipWeapon을 해제하고 weapon을 장착
+                                            player.WeaponEquipment(player, equipWeapon, weapon);
+                                            isSuccess = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                // 무기를 장착중이 아니라면
+                                else if (player.isWeaponEquip == false)
+                                {
+                                    //  weapon 무기 장착
+                                    player.WeaponEquipment(player, weapon);
+                                    isSuccess = true;
+                                    break;
+                                }
+
+                            }
+
+
+                            if (!isSuccess)
+                            {
+                                //   armors에 ItemNumber가 number 랑 같다면
+                                foreach (IArmor armor in armors.Where(ar => ar.ItemNumber == number))
+                                {
+                                    // 플레이어가 방어구를 장착했는지 확인
+                                    if (player.isArmorEquip)
+                                    {
+                                        // 장착중인 방어구를 확인(isEquip이 true라면)
+                                        foreach (IArmor equipArmor in armors.Where(ea => ea.isEquip))
+                                        {
+                                            // 장착중인 아이템 번호와 장찰할 아이템 번호가 같다면 방어구 해제
+                                            if (armor == equipArmor)
+                                            {
+                                                player.ArmorUnEquipment(player, armor);
+                                                break;
+                                            }
+                                            // 아니라면 방어구를 바꾼다.
+                                            else
+                                            {
+                                                player.ArmorEquipment(player, equipArmor, armor);
+                                                break;
+                                            }
+
+                                        }
+                                    }
+                                    // 장착을 안했다면 장착시켜주기
+                                    else if (player.isArmorEquip == false)
+                                    {
+                                        player.ArmorEquipment(player, armor);
+                                        break;
+                                    }
+                                }
+                            }
+
+
+                        }
+                        else
+                        {
+                            Console.WriteLine("잘못된 입력입니다.");
+                        }
                     }
                 }
             }
@@ -673,34 +735,37 @@ namespace SpartaDungeon
                 Console.Clear();
                 ItemNumberReset(weapons, armors);
 
-                Console.Write("상점");
-                if (isShopBuy)
-                    Console.WriteLine(" - 아이템 구매");
-
-                else
-                    Console.WriteLine();
-                Console.WriteLine("필요한 아이템을 구매와 판매 할 수 있는 상점입니다.\n");
-                Console.WriteLine("[보유 골드]");
-                Console.WriteLine($"{player.Gold} G\n");
-
-                Console.WriteLine("[아이템 목록]");
-                foreach (IWeapon weapon in weapons)
+                if (!isShopSell)
                 {
-                    weapon.ItemNumber = count;
-                    count++;
-                    Console.Write("- ");
+                    Console.Write("상점");
                     if (isShopBuy)
-                        Console.Write($"{weapon.ItemNumber}. ");
-                    weapon.StoreItemState();
-                }
-                foreach (IArmor armor in armors)
-                {
-                    armor.ItemNumber = count;
-                    count++;
-                    Console.Write("- ");
-                    if (isShopBuy)
-                        Console.Write($"{armor.ItemNumber}. ");
-                    armor.StoreItemState();
+                        Console.WriteLine(" - 아이템 구매");
+
+                    else
+                        Console.WriteLine();
+                    Console.WriteLine("필요한 아이템을 구매와 판매 할 수 있는 상점입니다.\n");
+                    Console.WriteLine("[보유 골드]");
+                    Console.WriteLine($"{player.Gold} G\n");
+
+                    Console.WriteLine("[아이템 목록]");
+                    foreach (IWeapon weapon in weapons)
+                    {
+                        weapon.ItemNumber = count;
+                        count++;
+                        Console.Write("- ");
+                        if (isShopBuy)
+                            Console.Write($"{weapon.ItemNumber}. ");
+                        weapon.StoreItemState();
+                    }
+                    foreach (IArmor armor in armors)
+                    {
+                        armor.ItemNumber = count;
+                        count++;
+                        Console.Write("- ");
+                        if (isShopBuy)
+                            Console.Write($"{armor.ItemNumber}. ");
+                        armor.StoreItemState();
+                    }
                 }
 
                 if (!isShopBuy && !isShopSell)
@@ -711,25 +776,35 @@ namespace SpartaDungeon
                     Console.WriteLine("원하시는 행동을 입력해주세요.");
                     Console.Write(">> ");
 
-                    int number = int.Parse(Console.ReadLine());
+                    int number;
+                    string s = Console.ReadLine();
+                    bool numberCheck = int.TryParse(s, out number);
 
-                    switch (number)
+                    if (!numberCheck)
                     {
-                        case 1:
-                            isShopBuy = true;
-                            break;
+                        Console.WriteLine("잘못된 입력입니다.");
+                    }
+                    else
+                    {
 
-                        case 2:
-                            isShopSell = true;
-                            break;
+                        switch (number)
+                        {
+                            case 1:
+                                isShopBuy = true;
+                                break;
 
-                        case 0:
-                            isStore = false;
-                            break;
+                            case 2:
+                                isShopSell = true;
+                                break;
 
-                        default:
-                            Console.WriteLine("잘못된 입력입니다.");
-                            break;
+                            case 0:
+                                isStore = false;
+                                break;
+
+                            default:
+                                Console.WriteLine("잘못된 입력입니다.");
+                                break;
+                        }
                     }
                 }
                 else if(isShopBuy)
@@ -738,71 +813,80 @@ namespace SpartaDungeon
                     Console.WriteLine("원하시는 행동을 입력해주세요.");
                     Console.Write(">> ");
 
-                    int number = int.Parse(Console.ReadLine());
+                    int number;
+                    string s = Console.ReadLine();
+                    bool numberCheck = int.TryParse(s, out number);
 
-                    if (count <= number)
+                    if (!numberCheck)
                     {
                         Console.WriteLine("잘못된 입력입니다.");
                     }
-                    else if (number == 0)
+                    else
                     {
-                        isShopBuy = false;
-                    }
-                    else if (count > number)
-                    {
-                        bool isSuccess = false;
-
-                        foreach (IWeapon weapon in weapons.Where(wp => wp.ItemNumber == number))
+                        if (count <= number)
                         {
-                            if (weapon.isAcquire)
-                            {
-                                Console.WriteLine("이미 구매한 아이템입니다.");
-                                isSuccess = true;
-                                break;
-                            }
-                            else if(player.Gold < weapon.WeaponGold)
-                            {
-                                Console.WriteLine("Gold 가 부족합니다.");
-                                isSuccess = true;
-                                break;
-                            }
-                            else if(player.Gold >= weapon.WeaponGold)
-                            {
-                                player.Gold -= weapon.WeaponGold;
-                                weapon.isAcquire = true;
-                                Console.WriteLine("구매를 완료했습니다.");
-                                isSuccess = true;
-                                break;
-                            }
-
+                            Console.WriteLine("잘못된 입력입니다.");
                         }
-                        if (!isSuccess)
+                        else if (number == 0)
                         {
-                            foreach (IArmor armor  in armors.Where(ar => ar.ItemNumber == number))
+                            isShopBuy = false;
+                        }
+                        else if (count > number)
+                        {
+                            bool isSuccess = false;
+
+                            foreach (IWeapon weapon in weapons.Where(wp => wp.ItemNumber == number))
                             {
-                                if (armor.isAcquire)
+                                if (weapon.isAcquire)
                                 {
                                     Console.WriteLine("이미 구매한 아이템입니다.");
                                     isSuccess = true;
                                     break;
                                 }
-                                else if (player.Gold < armor.ArmorGold)
+                                else if (player.Gold < weapon.WeaponGold)
                                 {
                                     Console.WriteLine("Gold 가 부족합니다.");
                                     isSuccess = true;
                                     break;
                                 }
-                                else if (player.Gold >= armor.ArmorGold)
+                                else if (player.Gold >= weapon.WeaponGold)
                                 {
-                                    player.Gold -= armor.ArmorGold;
-                                    armor.isAcquire = true;
+                                    player.Gold -= weapon.WeaponGold;
+                                    weapon.isAcquire = true;
                                     Console.WriteLine("구매를 완료했습니다.");
                                     isSuccess = true;
                                     break;
                                 }
 
                             }
-                            Thread.Sleep(time);
+                            if (!isSuccess)
+                            {
+                                foreach (IArmor armor in armors.Where(ar => ar.ItemNumber == number))
+                                {
+                                    if (armor.isAcquire)
+                                    {
+                                        Console.WriteLine("이미 구매한 아이템입니다.");
+                                        isSuccess = true;
+                                        break;
+                                    }
+                                    else if (player.Gold < armor.ArmorGold)
+                                    {
+                                        Console.WriteLine("Gold 가 부족합니다.");
+                                        isSuccess = true;
+                                        break;
+                                    }
+                                    else if (player.Gold >= armor.ArmorGold)
+                                    {
+                                        player.Gold -= armor.ArmorGold;
+                                        armor.isAcquire = true;
+                                        Console.WriteLine("구매를 완료했습니다.");
+                                        isSuccess = true;
+                                        break;
+                                    }
+
+                                }
+                                Thread.Sleep(time);
+                            }
                         }
                     }
 
@@ -811,8 +895,6 @@ namespace SpartaDungeon
                 {
                     while (isShopSell)
                     {
-                        Thread.Sleep(time);
-                        Console.Clear();
                         ItemNumberReset(weapons, armors);
 
                         // 아이템 번호를 1로 초기화
@@ -850,57 +932,69 @@ namespace SpartaDungeon
                         Console.WriteLine("\n0. 나가기\n");
                         Console.WriteLine("원하시는 행동을 입력해주세요.");
                         Console.Write(">> ");
-                        int number = int.Parse(Console.ReadLine());
 
-                        if (number >= count)
+                        int number;
+                        string s = Console.ReadLine();
+                        bool numberCheck = int.TryParse(s, out number);
+
+                        if (!numberCheck)
                         {
                             Console.WriteLine("잘못된 입력입니다.");
                         }
-                        else if (number == 0)
+                        else
                         {
-                            isShopSell = false;
-                        }
-                        else if (number < count)
-                        {
-                            foreach (IWeapon weapon in weapons.Where(wp => wp.ItemNumber == number))
+
+                            if (number >= count)
                             {
-                                if (weapon.isEquip)
-                                {
-                                    player.WeaponUnEquipment(player, weapon);
-                                    Console.WriteLine($"{weapon.Name}를(을) {weapon.WeaponGold * 0.85f}에 판매하셨습니다.");
-                                    player.Gold += (int)(weapon.WeaponGold * 0.85f);
-                                    isEquipManage = true;
-                                    weapon.isAcquire = false;
-                                    break;
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"{weapon.Name}를(을) {weapon.WeaponGold * 0.85f}에 판매하셨습니다.");
-                                    player.Gold += (int)(weapon.WeaponGold * 0.85f);
-                                    isEquipManage = true;
-                                    weapon.isAcquire = false;
-                                    break;
-                                }
+                                Console.WriteLine("잘못된 입력입니다.");
                             }
-                            foreach (IArmor armor in armors.Where(ar => ar.ItemNumber == number))
+                            else if (number == 0)
                             {
-                                if (armor.isEquip)
-                                {
-                                    player.ArmorUnEquipment(player, armor);
-                                    Console.WriteLine($"{armor.Name}를(을) {armor.ArmorGold * 0.85f}에 판매하셨습니다.");
-                                    player.Gold += (int)(armor.ArmorGold * 0.85f);
-                                    armor.isAcquire = false;
-                                    break;
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"{armor.Name}를(을) {armor.ArmorGold * 0.85f}에 판매하셨습니다.");
-                                    player.Gold += (int)(armor.ArmorGold * 0.85f);
-                                    armor.isAcquire = false;
-                                    break;
-                                }
+                                isShopSell = false;
                             }
-                            Thread.Sleep(time);
+                            else if (number < count)
+                            {
+                                foreach (IWeapon weapon in weapons.Where(wp => wp.ItemNumber == number))
+                                {
+                                    if (weapon.isEquip)
+                                    {
+                                        player.WeaponUnEquipment(player, weapon);
+                                        Console.WriteLine($"{weapon.Name}를(을) {weapon.WeaponGold * 0.85f}에 판매하셨습니다.");
+                                        player.Gold += (int)(weapon.WeaponGold * 0.85f);
+                                        isEquipManage = true;
+                                        weapon.isAcquire = false;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"{weapon.Name}를(을) {weapon.WeaponGold * 0.85f}에 판매하셨습니다.");
+                                        player.Gold += (int)(weapon.WeaponGold * 0.85f);
+                                        isEquipManage = true;
+                                        weapon.isAcquire = false;
+                                        break;
+                                    }
+                                }
+                                foreach (IArmor armor in armors.Where(ar => ar.ItemNumber == number))
+                                {
+                                    if (armor.isEquip)
+                                    {
+                                        player.ArmorUnEquipment(player, armor);
+                                        Console.WriteLine($"{armor.Name}를(을) {armor.ArmorGold * 0.85f}에 판매하셨습니다.");
+                                        player.Gold += (int)(armor.ArmorGold * 0.85f);
+                                        armor.isAcquire = false;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"{armor.Name}를(을) {armor.ArmorGold * 0.85f}에 판매하셨습니다.");
+                                        player.Gold += (int)(armor.ArmorGold * 0.85f);
+                                        armor.isAcquire = false;
+                                        break;
+                                    }
+                                }
+                                Thread.Sleep(time * 2);
+                                Console.Clear();
+                            }
                         }
 
                     }
@@ -908,6 +1002,7 @@ namespace SpartaDungeon
             }
         }
 
+        // 휴식
         public void Rest(IChracter player)
         {
 
@@ -928,33 +1023,147 @@ namespace SpartaDungeon
                 Console.WriteLine("0. 나가기\n");
                 Console.WriteLine("원하시는 행동을 입력해주세요.");
                 Console.Write(">> ");
-                int number = int.Parse(Console.ReadLine());
+                int number;
+                string s = Console.ReadLine();
+                bool numberCheck = int.TryParse(s, out number);
 
-                switch (number)
+                if (!numberCheck)
                 {
-                    case 1:
-                        if (player.Gold < 500)
-                        {
-                            Console.WriteLine("Gold 가 부족합니다!");
-                        }
-                        else
-                        {
-                            Console.WriteLine("휴식을 시작합니다.");
-                            Console.WriteLine($"체력 {restHeal}을 회복하셨습니다.");
-                            player.Health += restHeal;
-                            player.Gold -= 500;
-                            Thread.Sleep(time);
-                        }
-                        break;
+                    Console.WriteLine("잘못된 입력입니다.");
+                }
+                else
+                {
 
-                    case 0:
-                        isRest = false;
-                        break;
+                    switch (number)
+                    {
+                        case 1:
+                            if (player.Gold < 500)
+                            {
+                                Console.WriteLine("Gold 가 부족합니다!");
+                            }
+                            else
+                            {
+                                Console.WriteLine("휴식을 시작합니다.");
+                                Console.WriteLine($"체력 {restHeal}을 회복하셨습니다.");
+                                player.Health += restHeal;
+                                player.Gold -= 500;
+                                Thread.Sleep(time);
+                            }
+                            break;
 
-                    default:
-                        Console.WriteLine("잘못 입력하셨습니다.");
-                        break;
+                        case 0:
+                            isRest = false;
+                            break;
 
+                        default:
+                            Console.WriteLine("잘못 입력하셨습니다.");
+                            break;
+
+                    }
+                }
+            }
+        }
+
+        // 던전
+        public void Dungeon(string dungeonName, int recommendDefence,int rewardGold, IChracter player)
+        {
+            Thread.Sleep(time);
+            Console.Clear();
+            Random rand = new Random();
+            int num;
+            bool isFail = false;
+            if (player.Defence < recommendDefence)
+            {
+                num = rand.Next(1, 11);
+                // num의 값이 1 ~ 4 라면
+                if (0 < num && num < 5)
+                {
+                    isFail = true;
+                }
+            }
+
+            if (!isFail)
+            {
+                Console.WriteLine("던전 클리어");
+                Console.WriteLine("축하합니다!!");
+                Console.WriteLine($"{dungeonName}을 클리어 하셨습니다!\n");
+                Console.WriteLine("[탐험 결과]");
+                Console.Write($"체력 : {player.Health} => ");
+                num = rand.Next(20 - (player.Defence - recommendDefence), 36 - (player.Defence - recommendDefence));
+                player.TakeDamage(num);
+                num = rand.Next(rewardGold * (player.Attack/100), rewardGold * ((player.Attack * 2) / 100));
+                Console.WriteLine($"클리어 보상 {rewardGold} + 추가 보상 : {num} 만큼을 더 받으셨습니다!");
+                Console.Write($"Gold : {player.Gold} => ");
+                player.Gold += rewardGold + num;
+                Console.Write($"{player.Gold}");
+
+                Thread.Sleep(time * 5);
+            }
+            else
+            {
+                Console.WriteLine("던전탐험에 실패하셨습니다....\n\n");
+                Console.WriteLine("체력을 절반 잃어버리셨습니다");
+                Console.Write("남은 체력 : ");
+                player.TakeDamage(player.Health / 50);
+                
+
+                Thread.Sleep(time * 5);
+            }
+        }
+
+        public void DungeonSelect(IChracter player)
+        {
+            bool isDungoen = true;
+            Random random = new Random();
+
+            while (isDungoen)
+            {
+                Thread.Sleep(time);
+                Console.Clear();
+
+                Console.WriteLine("던전입장");
+                Console.WriteLine("이곳에서 던전으로 들어가기 전 활동을 할 수 있습니다.\n");
+
+                Console.WriteLine("1. 쉬운 던전     | 방어력 5 이상 권장");
+                Console.WriteLine("2. 일반 던전     | 방어력 11 이상 권장");
+                Console.WriteLine("3. 어려운 던전    | 방어력 17 이상 권장");
+
+                Console.WriteLine("\n0. 나가기");
+                Console.WriteLine("\n원하시는 행동을 입력해주세요.");
+                Console.Write(">> ");
+
+                int number;
+                string s = Console.ReadLine();
+                bool isNumberCheck = int.TryParse(s, out number);
+
+                if (!isNumberCheck)
+                {
+                    Console.WriteLine("잘못된 입력입니다.");
+                }
+                else
+                {
+                    switch (number)
+                    {
+                        case 1:
+                            Dungeon("쉬운 던전", 5, 1000, player);
+                            break;
+
+                        case 2:
+                            Dungeon("중간 던전", 11, 17000, player);
+                            break;
+
+                        case 3:
+                            Dungeon("어려운 던전", 15, 2500, player);
+                            break;
+
+                        case 0:
+                            isDungoen = false;
+                            break;
+
+                        default:
+                            Console.WriteLine("잘못된 입력입니다.");
+                            break;
+                    }
                 }
             }
         }
