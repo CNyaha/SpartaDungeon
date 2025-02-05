@@ -235,6 +235,11 @@ namespace SpartaDungeon
                 Exp = 0;
                 Console.WriteLine("레벨업을 하셨습니다!.");
                 Console.WriteLine($"현재 레벨 : {Level}");
+                if (Level % 2 == 1)
+                {
+                    Attack++;
+                }
+                Defence++;
             }
         }
 
@@ -1091,11 +1096,15 @@ namespace SpartaDungeon
                 Console.Write($"체력 : {player.Health} => ");
                 num = rand.Next(20 - (player.Defence - recommendDefence), 36 - (player.Defence - recommendDefence));
                 player.TakeDamage(num);
-                num = rand.Next(rewardGold * (player.Attack/100), rewardGold * ((player.Attack * 2) / 100));
-                Console.WriteLine($"클리어 보상 {rewardGold} + 추가 보상 : {num} 만큼을 더 받으셨습니다!");
+                double minGold = rewardGold * ((player.Attack + player.WeaponAttack)) * 0.01;
+                double maxGold = rewardGold * ((player.Attack + player.WeaponAttack) * 2) * 0.01;
+                double reward = minGold + (maxGold - minGold) * rand.NextDouble();
+                Console.WriteLine($"클리어 보상 {rewardGold} + 추가 보상 : {(int)reward} 만큼을 더 받으셨습니다!");
                 Console.Write($"Gold : {player.Gold} => ");
-                player.Gold += rewardGold + num;
-                Console.Write($"{player.Gold}");
+                player.Gold += rewardGold + (int)reward;
+                Console.WriteLine($"{player.Gold}");
+
+                player.LevelExp(1);
 
                 Thread.Sleep(time * 5);
             }
